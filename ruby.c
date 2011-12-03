@@ -23,6 +23,7 @@
 #include "parse.h"
 #include "read.h"
 #include "vstring.h"
+#include <regex.h>
 
 /*
 *   DATA DECLARATIONS
@@ -93,6 +94,35 @@ static boolean canMatch (const unsigned char** s, const char* literal)
 	}
 	*s += literal_length;
 	return TRUE;
+}
+
+static boolean matchConditionalWithoutBlanks(const unsigned char** s)
+{
+    regex_t regex;
+    int reti;
+    char msgbuf[100];
+
+
+    reti = regcomp(&regex, "=[[:space:]]*(if|case|unless)", REG_EXTENDED);
+    if( reti ){ fprintf(stderr, "Could not compile regex\n"); exit(1); }
+
+    reti = regexec(&regex, *s, 0, NULL, 0);
+
+    regfree(&regex);
+
+    if( !reti ){
+        return TRUE;
+    }
+    else if( reti == REG_NOMATCH ){
+        return FALSE;
+    }
+    else{
+        regerror(reti, &regex, msgbuf, sizeof(msgbuf));
+        fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+        exit(1);
+    }
+
+    
 }
 
 /*
@@ -307,7 +337,7 @@ static void findRubyTags (void)
 		*
 		*   return if <exp>
 		*
-		* FIXME: this is fooled by code such as
+		*  With matchConditionalWithoutBlanks below code works as expected:
 		*
 		*   result = if <exp>
 		*               <a>
@@ -325,7 +355,9 @@ static void findRubyTags (void)
 			canMatch (&cp, "while"))
 		{
 			enterUnnamedScope ();
-		}
+		} else if ( matchConditionalWithoutBlanks(&cp) ){
+			enterUnnamedScope ();
+        }
 
 		/*
 		* "module M", "class C" and "def m" should only be at the beginning
