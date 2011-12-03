@@ -388,7 +388,7 @@ static void findRubyTags (void)
 			{
 				++cp;
 			}
-			else if (*cp == '#')
+			else if (*cp == '#' )
 			{
 				/* FIXME: this is wrong, but there *probably* won't be a
 				* definition after an interpolated string (where # doesn't
@@ -406,14 +406,17 @@ static void findRubyTags (void)
 				vStringDelete (stringListLast (nesting));
 				stringListRemoveLast (nesting);
 			}
-			else if (*cp == '"')
+			else if (*cp == '"')  // FIXME: It doesn't handle single quotes
 			{
 				/* Skip string literals.
 				 * FIXME: should cope with escapes and interpolation.
 				 */
 				do {
 					++cp;
-				} while (*cp != 0 && *cp != '"');
+				} while (*cp != '\0' && *cp != '"');
+
+                if ( *cp == '"' )
+                    ++cp;
 			}
 			else if (*cp != '\0')
 			{
