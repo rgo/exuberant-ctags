@@ -96,6 +96,18 @@ static boolean canMatch (const unsigned char** s, const char* literal)
 	return TRUE;
 }
 
+/*
+ * Start a scope with assignments from conditionals and switch case.
+ *
+ * For example:
+ *
+ *   result = if <exp>
+ *               <a>
+ *            else
+ *               <b>
+ *            end
+ *
+ */
 static boolean matchConditionalWithoutBlanks(const unsigned char** s)
 {
     regex_t regex;
@@ -336,14 +348,6 @@ static void findRubyTags (void)
 		/* Avoid mistakenly starting a scope for modifiers such as
 		*
 		*   return if <exp>
-		*
-		*  With matchConditionalWithoutBlanks below code works as expected:
-		*
-		*   result = if <exp>
-		*               <a>
-		*            else
-		*               <b>
-		*            end
 		*
 		* FIXME: we're also fooled if someone does something heinous such as
 		*
