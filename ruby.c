@@ -26,11 +26,6 @@
 #include <regex.h>
 
 /*
-*   MACROS
-*/
-#define isquote(c)            (c == '"' || c == '\'')
-
-/*
 *   DATA DECLARATIONS
 */
 typedef enum {
@@ -415,16 +410,28 @@ static void findRubyTags (void)
 				vStringDelete (stringListLast (nesting));
 				stringListRemoveLast (nesting);
 			}
-			else if ( isquote(*cp) )
+			else if ( *cp == '"' )
 			{
 				/* Skip string literals.
 				 * FIXME: should cope with escapes and interpolation.
 				 */
 				do {
 					++cp;
-				} while ( *cp != '\0' && !isquote(*cp) );
+				} while ( *cp != '\0' && *cp!='"' );
 
-                if ( isquote(*cp) )
+                if ( *cp=='"' )
+                    ++cp;
+			}
+			else if ( *cp == '\'' )
+			{
+				/* Skip string literals.
+				 * FIXME: should cope with escapes and interpolation.
+				 */
+				do {
+					++cp;
+				} while ( *cp != '\0' && *cp!='\'' );
+
+                if ( *cp=='\'' )
                     ++cp;
 			}
 			else if (*cp != '\0')
