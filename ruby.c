@@ -138,6 +138,19 @@ static boolean matchConditionalWithoutBlanks(const unsigned char** s)
 }
 
 /*
+ * Displace pointer after char a or to EOL
+ *
+ */
+void advanceUntil(const unsigned char **cp, const char character)
+{
+    do {
+        (*cp)++;
+    } while ( **cp != '\0' && **cp != character );
+
+    if(**cp == character) (*cp)++;
+}
+
+/*
 * Attempts to advance 'cp' past a Ruby operator method name. Returns
 * TRUE if successful (and copies the name into 'name'), FALSE otherwise.
 */
@@ -412,27 +425,17 @@ static void findRubyTags (void)
 			}
 			else if ( *cp == '"' )
 			{
-				/* Skip string literals.
-				 * FIXME: should cope with escapes and interpolation.
-				 */
-				do {
-					++cp;
-				} while ( *cp != '\0' && *cp!='"' );
-
-                if ( *cp=='"' )
-                    ++cp;
+                /* Skip string literals.
+                 * FIXME: should cope with escapes and interpolation.
+                 */
+                advanceUntil(&cp, '"');
 			}
 			else if ( *cp == '\'' )
 			{
 				/* Skip string literals.
 				 * FIXME: should cope with escapes and interpolation.
 				 */
-				do {
-					++cp;
-				} while ( *cp != '\0' && *cp!='\'' );
-
-                if ( *cp=='\'' )
-                    ++cp;
+                advanceUntil(&cp, '\'');
 			}
 			else if (*cp != '\0')
 			{
